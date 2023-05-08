@@ -1,4 +1,4 @@
-import { XCircleIcon } from "@heroicons/react/24/outline";
+import { CheckIcon, XCircleIcon } from "@heroicons/react/24/outline";
 import { SpeakerXMarkIcon, SpeakerWaveIcon } from "@heroicons/react/24/outline";
 import { modalState, movieState } from "../atoms/modalAtom";
 import Modal from "@mui/material/Modal";
@@ -9,6 +9,10 @@ import ReactPlayer from "react-player/lazy";
 import { FaPlay } from "react-icons/fa";
 import { AiOutlinePlus } from "react-icons/ai";
 import { FiThumbsUp } from "react-icons/fi";
+import { deleteDoc, doc, setDoc } from "firebase/firestore";
+import { db } from "@/firebase";
+import useAuth from "@/hooks/useAuth";
+import toast, { Toaster } from "react-hot-toast";
 
 function Modals() {
   const [showModal, setShowModal] = useRecoilState(modalState);
@@ -16,6 +20,8 @@ function Modals() {
   const [trailer, setTrailer] = useState("");
   const [genres, setGenres] = useState<Genre[]>();
   const [muted, setMuted] = useState(true);
+  const { user } = useAuth();
+  const [addedToList, setAddedToList] = useState(false);
 
   //fetch videos using useEffect
   useEffect(() => {
@@ -50,11 +56,33 @@ function Modals() {
     fetchMovie();
   }, [movie]);
 
+  //handles adding or removing movie from the list
+  const handleList = async () => {
+    if (addedToList) {
+      await deleteDoc(
+        //provide the db instance and goes into the collection of customers, provide the user uid and creates "myList" and tap onto the movie id and convert to string
+        doc(db, "customers", user!.uid, "myList", movie?.id.toString()!)
+      );
+
+      toast(
+        `${movie?.title || movie?.original_name} has been removed from My List`,
+        {
+          duration: 8000,
+        }
+      );
+    } else {
+      await setDoc(
+        //ID
+        doc(db, "customers", user!.uid, "myList", movie?.id.toString()!),
+        //movie that will be added to collection
+        { ...movie }
+      );
+    }
+  };
+
   const handleClose = () => {
     setShowModal(false);
   };
-
-  console.log(trailer);
 
   return (
     <Modal
@@ -63,6 +91,7 @@ function Modals() {
       className="fixex !top-7 left-0 right-0 z-50 mx-auto w-full max-w-5xl overflow-hidden overflow-y-scroll rounded-md scrollbar-hide"
     >
       <>
+        <Toaster position="bottom-center" />
         <button
           className="modalButton absolute right-5 top-5 !z-40 h-9 w-9 border-none bg-[#181818] hover:bg-[#181818]"
           onClick={handleClose}
@@ -84,8 +113,12 @@ function Modals() {
                 <FaPlay className="h-7 w-7 text-black" />
                 Play
               </button>
-              <button className="modalButton">
-                <AiOutlinePlus className="h-7 w-7" />
+              <button className="modalButton" onClick={handleList}>
+                {addedToList ? (
+                  <CheckIcon className="h-7 w-7" />
+                ) : (
+                  <AiOutlinePlus className="h-7 w-7" />
+                )}
               </button>
               <button className="modalButton">
                 <FiThumbsUp className="h-7 w-7" />

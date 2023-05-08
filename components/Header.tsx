@@ -3,6 +3,7 @@ import NotificationsIcon from "@mui/icons-material/Notifications";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import useAuth from "@/hooks/useAuth";
+import BasicMenu from "./BasicMenu";
 
 function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -32,6 +33,8 @@ function Header() {
           className="cursor-pointer object-contain"
           alt="netlfix logo"
         />
+        <BasicMenu />
+
         <ul className="hidden space-x-4 md:flex">
           <li className="headerLink list-none">Home</li>
           <li className="headerLink list-none">TV Shows</li>
@@ -45,14 +48,13 @@ function Header() {
         <SearchIcon className="hidden sm:inline h-6 w-6" />
         <p className="hidden lg:inline">Kids</p>
         <NotificationsIcon className="h-6 w-6" />
-        {/* <Link href="/account"> */}
-        <img
-          onClick={logout}
-          src="https://rb.gy/g1pwyx"
-          alt=""
-          className="cursor-pointer rounded"
-        />
-        {/* </Link> */}
+        <Link href="/account">
+          <img
+            src="https://rb.gy/g1pwyx"
+            alt=""
+            className="cursor-pointer rounded"
+          />
+        </Link>
       </div>
     </header>
   );
